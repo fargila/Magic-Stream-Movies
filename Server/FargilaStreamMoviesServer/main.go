@@ -2,16 +2,28 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	controller "github.com/fargila/Magic-Stream-Movies/Server/FargilaStreamMoviesServer/controllers"
+	database "github.com/fargila/Magic-Stream-Movies/Server/FargilaStreamMoviesServer/database"
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
-	//fmt.Println("Hello, FargilaStreamMoviesServer!")
+func init() {
+	gin.SetMode(gin.ReleaseMode)
+}
 
+func main() {
+
+	if database.Client == nil {
+		log.Fatal("MongoDB client was not initialized")
+	}
 	router := gin.Default()
-	router.GET("/hello", func(c *gin.Context) {
+	if err := router.SetTrustedProxies([]string{"192.168.0.0/16"}); err != nil {
+		log.Fatal("Error while configurating trustfull proxies:", err)
+	}
+
+	router.GET("/", func(c *gin.Context) {
 		c.String(200, "Hello, FargilaStreamMovies!")
 	})
 
