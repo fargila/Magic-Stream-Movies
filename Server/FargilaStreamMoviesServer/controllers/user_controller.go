@@ -74,3 +74,14 @@ func RegisterUser() gin.HandlerFunc {
 		c.JSON(http.StatusCreated, result)
 	}
 }
+
+func LoginUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var userLogin models.UserLogin
+
+		if err := c.ShouldBindJSON(&userLogin); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input data!"})
+			return
+		}
+	}
+}
