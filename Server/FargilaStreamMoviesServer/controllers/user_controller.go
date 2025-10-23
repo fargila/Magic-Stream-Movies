@@ -105,7 +105,6 @@ func LoginUser() gin.HandlerFunc {
 			return
 		}
 
-		//TODO: fix this "error Failed to generate tokens"
 		token, refreshToken, err := utils.GenerateAllTokens(
 			foundUser.Email,
 			foundUser.FirstName,
