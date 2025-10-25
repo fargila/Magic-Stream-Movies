@@ -8,8 +8,9 @@ import (
 )
 
 func SetupProtectedRoutes(router *gin.Engine) {
-	router.Use(middleware.AuthMiddleware())
+	protected := router.Group("/")
+	protected.Use(middleware.AuthMiddleware())
 
-	router.GET("/movie/:imdb_id", controller.GetMovie())
-	router.POST("/addmovie", controller.AddMovie())
+	protected.GET("/movie/:imdb_id", controller.GetMovie())
+	protected.POST("/addmovie", controller.AddMovie())
 }
