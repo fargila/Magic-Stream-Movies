@@ -110,7 +110,7 @@ func AdminReviewUpdate() gin.HandlerFunc {
 		}
 
 		if role != "ADMIN" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "user must be part of the ADMIN role"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "user must be part of the ADMIN role"})
 			return
 		}
 
