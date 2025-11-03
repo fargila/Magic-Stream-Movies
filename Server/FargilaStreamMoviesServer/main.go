@@ -7,6 +7,8 @@ import (
 	database "github.com/fargila/Magic-Stream-Movies/Server/FargilaStreamMoviesServer/database"
 	routes "github.com/fargila/Magic-Stream-Movies/Server/FargilaStreamMoviesServer/routes"
 
+	"go.mongodb.org/mongo-driver/v2/mongo"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,10 +17,6 @@ func init() {
 }
 
 func main() {
-
-	if database.Client == nil {
-		log.Fatal("MongoDB client was not initialized")
-	}
 
 	router := gin.Default()
 	if err := router.SetTrustedProxies([]string{"192.168.0.0/16"}); err != nil {
@@ -29,8 +27,10 @@ func main() {
 		c.String(200, "Hello, FargilaStreamMovies!")
 	})
 
-	routes.SetupUnprotectedRoutes(router)
-	routes.SetupProtectedRoutes(router)
+	var client *mongo.Client = database.Connect()
+
+	routes.SetupUnprotectedRoutes(router, client)
+	routes.SetupProtectedRoutes(router, client)
 
 	if err := router.Run(":8080"); err != nil {
 		fmt.Println("Failed to start server:", err)
