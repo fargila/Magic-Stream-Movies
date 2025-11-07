@@ -224,7 +224,7 @@ func GetReviewRanking(admin_review string, client *mongo.Client, c *gin.Context)
 	return response, rankVal, nil
 }
 
-func GetRankings(client *mongo.Client) ([]models.Ranking, error) {
+func GetRankings(client *mongo.Client, c *gin.Context) ([]models.Ranking, error) {
 	var rankings []models.Ranking
 	var ctx, cancel = context.WithTimeout(c, 100*time.Second)
 	defer cancel()

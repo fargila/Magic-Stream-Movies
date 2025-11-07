@@ -82,7 +82,8 @@ func UpdateAllTokens(
 	userId,
 	token,
 	refreshToken string,
-	client *mongo.Client) (err error) {
+	client *mongo.Client,
+	c *gin.Context) (err error) {
 
 	var ctx, cancel = context.WithTimeout(c, 100*time.Second)
 	defer cancel()
