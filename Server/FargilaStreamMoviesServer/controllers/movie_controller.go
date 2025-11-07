@@ -12,7 +12,7 @@ import (
 
 	database "github.com/fargila/Magic-Stream-Movies/Server/FargilaStreamMoviesServer/database"
 	models "github.com/fargila/Magic-Stream-Movies/Server/FargilaStreamMoviesServer/models"
-	"github.com/fargila/Magic-Stream-Movies/Server/FargilaStreamMoviesServer/utils"
+	utils "github.com/fargila/Magic-Stream-Movies/Server/FargilaStreamMoviesServer/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -28,7 +28,7 @@ var validate = validator.New()
 
 func GetMovies(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+		ctx, cancel := context.WithTimeout(c, 100*time.Second)
 		defer cancel()
 
 		var movieCollection *mongo.Collection = database.OpenCollection("movies", client)
@@ -53,7 +53,7 @@ func GetMovies(client *mongo.Client) gin.HandlerFunc {
 
 func GetMovie(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+		ctx, cancel := context.WithTimeout(c, 100*time.Second)
 		defer cancel()
 
 		var movieCollection *mongo.Collection = database.OpenCollection("movies", client)
@@ -78,7 +78,7 @@ func GetMovie(client *mongo.Client) gin.HandlerFunc {
 
 func AddMovie(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+		ctx, cancel := context.WithTimeout(c, 100*time.Second)
 		defer cancel()
 
 		var movieCollection *mongo.Collection = database.OpenCollection("movies", client)
@@ -137,7 +137,7 @@ func AdminReviewUpdate(client *mongo.Client) gin.HandlerFunc {
 			return
 		}
 
-		sentiment, rankVal, err := GetReviewRanking(req.AdminReview, client)
+		sentiment, rankVal, err := GetReviewRanking(req.AdminReview, client, c)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting review ranking"})
 			return
@@ -153,7 +153,7 @@ func AdminReviewUpdate(client *mongo.Client) gin.HandlerFunc {
 				},
 			},
 		}
-		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var ctx, cancel = context.WithTimeout(c, 100*time.Second)
 		defer cancel()
 
 		var movieCollection *mongo.Collection = database.OpenCollection("movies", client)
@@ -175,8 +175,8 @@ func AdminReviewUpdate(client *mongo.Client) gin.HandlerFunc {
 	}
 }
 
-func GetReviewRanking(admin_review string, client *mongo.Client) (string, int, error) {
-	rankings, err := GetRankings(client)
+func GetReviewRanking(admin_review string, client *mongo.Client, c *gin.Context) (string, int, error) {
+	rankings, err := GetRankings(client, c)
 
 	if err != nil {
 		return "", 0, err
@@ -208,7 +208,7 @@ func GetReviewRanking(admin_review string, client *mongo.Client) (string, int, e
 	base_prompt_template := os.Getenv("BASE_PROMPT_TEMPLATE")
 	base_prompt := strings.Replace(base_prompt_template, "{rankings}", sentimentDelimited, 1)
 
-	response, err := llm.Call(context.Background(), base_prompt+admin_review)
+	response, err := llm.Call(c, base_prompt+admin_review)
 	if err != nil {
 		return "", 0, err
 	}
@@ -226,7 +226,7 @@ func GetReviewRanking(admin_review string, client *mongo.Client) (string, int, e
 
 func GetRankings(client *mongo.Client) ([]models.Ranking, error) {
 	var rankings []models.Ranking
-	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+	var ctx, cancel = context.WithTimeout(c, 100*time.Second)
 	defer cancel()
 
 	var rankingCollection *mongo.Collection = database.OpenCollection("rankings", client)
@@ -253,7 +253,7 @@ func GetRecommendedMovies(client *mongo.Client) gin.HandlerFunc {
 			return
 		}
 
-		favourite_genres, err := GetUserFavouriteGenres(userId, client)
+		favourite_genres, err := GetUserFavouriteGenres(userId, client, c)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -276,7 +276,7 @@ func GetRecommendedMovies(client *mongo.Client) gin.HandlerFunc {
 
 		filter := bson.M{"genre.genre_name": bson.M{"$in": favourite_genres}}
 
-		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+		ctx, cancel := context.WithTimeout(c, 100*time.Second)
 		defer cancel()
 
 		var movieCollection *mongo.Collection = database.OpenCollection("movies", client)
@@ -298,8 +298,8 @@ func GetRecommendedMovies(client *mongo.Client) gin.HandlerFunc {
 	}
 }
 
-func GetUserFavouriteGenres(userId string, client *mongo.Client) ([]string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+func GetUserFavouriteGenres(userId string, client *mongo.Client, c *gin.Context) ([]string, error) {
+	ctx, cancel := context.WithTimeout(c, 100*time.Second)
 	defer cancel()
 
 	var userCollection *mongo.Collection = database.OpenCollection("users", client)

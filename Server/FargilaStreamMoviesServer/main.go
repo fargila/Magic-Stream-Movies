@@ -29,6 +29,10 @@ func main() {
 
 	var client *mongo.Client = database.Connect()
 
+	if err := client.Ping(context.Background(), nil); err != nil {
+		log.Fatalf("Failed to reach server: %v", err)
+	}
+
 	routes.SetupUnprotectedRoutes(router, client)
 	routes.SetupProtectedRoutes(router, client)
 

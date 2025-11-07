@@ -49,7 +49,7 @@ func RegisterUser(client *mongo.Client) gin.HandlerFunc {
 			return
 		}
 
-		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var ctx, cancel = context.WithTimeout(c, 100*time.Second)
 		defer cancel()
 
 		var userCollection *mongo.Collection = database.OpenCollection("users", client)
@@ -88,7 +88,7 @@ func LoginUser(client *mongo.Client) gin.HandlerFunc {
 			return
 		}
 
-		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var ctx, cancel = context.WithTimeout(c, 100*time.Second)
 		defer cancel()
 
 		var userCollection *mongo.Collection = database.OpenCollection("users", client)
