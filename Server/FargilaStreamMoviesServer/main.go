@@ -7,6 +7,7 @@ import (
 
 	database "github.com/fargila/Magic-Stream-Movies/Server/FargilaStreamMoviesServer/database"
 	routes "github.com/fargila/Magic-Stream-Movies/Server/FargilaStreamMoviesServer/routes"
+	"github.com/joho/godotenv"
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
@@ -28,11 +29,23 @@ func main() {
 		c.String(200, "Hello, FargilaStreamMovies!")
 	})
 
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Println("Warning: unable to find")
+	}
+
 	var client *mongo.Client = database.Connect()
 
 	if err := client.Ping(context.Background(), nil); err != nil {
 		log.Fatalf("Failed to reach server: %v", err)
 	}
+
+	defer func() {
+		err := client.Disconnect(context.Background())
+		if err != nil {
+			log.Fatalf("Failed to disconnect from MongoDB: %v", err)
+		}
+	}()
 
 	routes.SetupUnprotectedRoutes(router, client)
 	routes.SetupProtectedRoutes(router, client)
